@@ -19,7 +19,11 @@ module.exports = class NodeBoot {
             this.appConfig = Object.assign(this.appConfig, require('../../' + node_boot.application_path));
         } catch (e) {}
 
-        let modules = [ path.join(__dirname,'/**/*.js') ].concat(Object.values(node_boot.modules));
+        let nodeBootModulesResolved = [];
+        Object.values(this.appConfig.node_boot.modules).forEach((pathString)=>{
+            nodeBootModulesResolved.push(path.join(path.dirname(require.main.filename), "../", pathString));
+        });
+        let modules = [ path.join(__dirname,'/**/*.js') ].concat(Object.values(nodeBootModulesResolved));
 
         this.container.loadModules(modules,
             {
