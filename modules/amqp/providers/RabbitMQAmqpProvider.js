@@ -78,9 +78,7 @@ module.exports = class RabbitMQAmqpProvider {
             paramArray.forEach((data)=>{
 
                 channel.consume(data[1], async (payload) => {
-                    await data[2](payload);
-                    // acknowledge message as received
-                    await channel.ack(payload);
+                    await data[2](payload, channel);
                 });
 
             });
