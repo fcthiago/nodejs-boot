@@ -3,6 +3,7 @@ const application = require('./Application');
 
 const fs = require('fs');
 const path = require('path');
+const deepmerge = require('deepmerge');
 
 
 module.exports = class NodeBoot {
@@ -16,7 +17,7 @@ module.exports = class NodeBoot {
         const { node_boot } = this.appConfig;
 
         try {
-            this.appConfig = Object.assign(this.appConfig, require('../../' + node_boot.application_path));
+            this.appConfig = deepmerge(this.appConfig, require('../../' + node_boot.application_path));
         } catch (e) {}
 
         let nodeBootModulesResolved = [];
