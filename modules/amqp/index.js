@@ -11,12 +11,15 @@ module.exports = async (container) => {
         const rabbitMQAmqpProvider = container.resolve("rabbitMqAmqpProvider");
         await rabbitMQAmqpProvider.setupQueues();
     }
+
     if(ServiceBusAmqpProvider.checkConfiguration(application)){
         const serviceBusAmqpProvider = container.resolve("serviceBusAmqpProvider");
         await serviceBusAmqpProvider.setupQueues();
     }
 
-    await configure(application, container);
+    if(ServiceBusAmqpProvider.checkConfiguration(application) || RabbitMQAmqpProvider.checkConfiguration(application)){
+        await configure(application, container);
+    }
 };
 
 async function configure(application, container) {
