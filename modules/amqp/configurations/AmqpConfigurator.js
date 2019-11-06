@@ -7,7 +7,7 @@ module.exports = class AmqpConfigurator {
     }
 
     configure(application, container) {
-        const inBrokers = listModules(path.join(path.dirname(require.main.filename), "../",application.node_boot.modules.inBrokers));
+        const inBrokers = listModules(path.join(path.dirname(require.main.filename), "../",application.node_boot.modules.in_brokers));
 
         for(const key in inBrokers) {
             const className = inBrokers[key].name;
