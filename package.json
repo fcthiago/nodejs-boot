@@ -17,6 +17,7 @@
     "azure-sb": "^0.11.1",
     "body-parser": "^1.19.0",
     "cookie-parser": "^1.4.4",
+    "deepmerge": "^4.2.2",
     "express": "^4.17.1",
     "log4js": "^5.1.0",
     "morgan": "^1.9.1"

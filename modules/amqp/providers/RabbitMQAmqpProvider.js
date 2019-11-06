@@ -78,9 +78,7 @@ module.exports = class RabbitMQAmqpProvider {
             paramArray.forEach((data)=>{
 
                 channel.consume(data[1], async (payload) => {
-                    await data[2](payload);
-                    // acknowledge message as received
-                    await channel.ack(payload);
+                    await data[2](payload, channel);
                 });
 
             });
@@ -127,7 +125,7 @@ module.exports = class RabbitMQAmqpProvider {
             }finally {
                 //Create exchange
                 await channel.assertExchange(bind.exchange.name, bind.exchange.type, bind.exchange.options);
-                if (application.amqp.verbose) this.logger.debug(`[RabbitMQ Setup] - [${bind.exchange.name}] - Creating Exchange...`);
+                if (application.amqp.verbose) this.logger.debug(`[RabbitMQ Setup] - [${bind.exchange.name}][${bind.exchange.type}] - Creating Exchange...`);
             }
             await channel.close();
 
@@ -149,7 +147,7 @@ module.exports = class RabbitMQAmqpProvider {
                     if (application.amqp.verbose) this.logger.debug(`[RabbitMQ Setup] - [${queue.name}] - Creating Queue...`);
                     await channel.bindQueue(queue.name, bind.exchange.name, queue.routingKey);
                     if (application.amqp.verbose && queue.routingKey) this.logger.debug(`[RabbitMQ Setup] - [${queue.name}] - Binding with exchange - [${bind.exchange.name}] with RoutingKey [${queue.routingKey}]...`);
-                    else this.logger.debug(`[RabbitMQ Setup] - [${queue.name}] - Binding with exchange - [${bind.exchange.name}] ...`);
+                    else if(application.amqp.verbose) this.logger.debug(`[RabbitMQ Setup] - [${queue.name}] - Binding with exchange - [${bind.exchange.name}] ...`);
                 }
                 await channel.close();
             }

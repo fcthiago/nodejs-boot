@@ -1,12 +1,12 @@
 const { listModules } = require('awilix');
-
+const path = require("path");
 module.exports = class RouterConfigurator {
     constructor ({ application }) {
         this.modules = application.node_boot.modules;
     }
 
     configure (express, container) {
-        const controllers = listModules(this.modules.controllers);
+        const controllers = listModules(path.join(path.dirname(require.main.filename), "../",this.modules.controllers));
 
         for(const key in controllers) {
             const className = controllers[key].name;
@@ -24,4 +24,4 @@ module.exports = class RouterConfigurator {
             return index == 0 ? word.toLowerCase() : word.toUpperCase();
         }).replace(/\s+/g, '');
     }
-}
+};

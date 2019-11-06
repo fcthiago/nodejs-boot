@@ -1,4 +1,5 @@
 const { listModules } = require('awilix');
+const path = require("path");
 
 module.exports = class MiddlewareConfigurator {
     constructor ({ application }) {
@@ -6,7 +7,7 @@ module.exports = class MiddlewareConfigurator {
     }
 
     configure (express, container) {
-        const middlewares = listModules(this.modules.middlewares);
+        const middlewares = listModules(path.join(path.dirname(require.main.filename), "../",this.modules.middlewares));
 
         for(const key in middlewares) {
             const className = middlewares[key].name;
@@ -22,4 +23,4 @@ module.exports = class MiddlewareConfigurator {
         }).replace(/\s+/g, '');
     }
 
-}
+};
