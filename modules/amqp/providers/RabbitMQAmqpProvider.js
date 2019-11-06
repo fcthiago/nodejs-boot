@@ -112,43 +112,17 @@ module.exports = class RabbitMQAmqpProvider {
         if (application.amqp.verbose) this.logger.debug("[RabbitMQ Setup] - Starting...");
         for (const bind of binds) {
             channel = await connection.createChannel();
-            try{
-                //Check if exchange exist
-                await channel.checkExchange(bind.exchange.name);
-                await channel.deleteExchange(bind.exchange.name);
-                if (application.amqp.verbose) this.logger.debug(`[RabbitMQ Setup] - [${bind.exchange.name}] - Exchange already exist. Deleting...`);
-            }catch (e) {
-                //When exchange dont exist the channel is closed
-                //Here we create another channel to create an exchange on finally
-                if (application.amqp.verbose) this.logger.debug(`[RabbitMQ Setup] - [${bind.exchange.name}] - Exchange not exist.`);
-                channel = await connection.createChannel();
-            }finally {
-                //Create exchange
-                await channel.assertExchange(bind.exchange.name, bind.exchange.type, bind.exchange.options);
-                if (application.amqp.verbose) this.logger.debug(`[RabbitMQ Setup] - [${bind.exchange.name}][${bind.exchange.type}] - Creating Exchange...`);
-            }
-            await channel.close();
+            //Create exchange
+            await channel.assertExchange(bind.exchange.name, bind.exchange.type, bind.exchange.options);
+            if (application.amqp.verbose) this.logger.debug(`[RabbitMQ Setup] - [${bind.exchange.name}][${bind.exchange.type}] - Creating Exchange...`);
 
             for(const queue of bind.queues){
-                channel = await connection.createChannel();
-                try{
-                    //Check if a queue exist
-                    await channel.checkQueue(queue.name);
-                    await channel.deleteQueue(queue.name);
-                    if (application.amqp.verbose) this.logger.debug(`[RabbitMQ Setup] - [${queue.name}] - Queue already exist. Deleting...`);
-                }catch (e) {
-                    //When queue dont exist the channel is closed
-                    //Here we create another channel to create a queue on finally
-                    if (application.amqp.verbose) this.logger.debug(`[RabbitMQ Setup] - [${queue.name}] - Queue not exist.`);
-                    channel = await connection.createChannel();
-                }finally {
-                    //Create Queue
-                    await channel.assertQueue(queue.name, queue.options);
-                    if (application.amqp.verbose) this.logger.debug(`[RabbitMQ Setup] - [${queue.name}] - Creating Queue...`);
-                    await channel.bindQueue(queue.name, bind.exchange.name, queue.routingKey);
-                    if (application.amqp.verbose && queue.routingKey) this.logger.debug(`[RabbitMQ Setup] - [${queue.name}] - Binding with exchange - [${bind.exchange.name}] with RoutingKey [${queue.routingKey}]...`);
-                    else if(application.amqp.verbose) this.logger.debug(`[RabbitMQ Setup] - [${queue.name}] - Binding with exchange - [${bind.exchange.name}] ...`);
-                }
+                //Create Queue
+                await channel.assertQueue(queue.name, queue.options);
+                if (application.amqp.verbose) this.logger.debug(`[RabbitMQ Setup] - [${queue.name}] - Creating Queue...`);
+                await channel.bindQueue(queue.name, bind.exchange.name, queue.routingKey);
+                if (application.amqp.verbose && queue.routingKey) this.logger.debug(`[RabbitMQ Setup] - [${queue.name}] - Binding with exchange - [${bind.exchange.name}] with RoutingKey [${queue.routingKey}]...`);
+                else if(application.amqp.verbose) this.logger.debug(`[RabbitMQ Setup] - [${queue.name}] - Binding with exchange - [${bind.exchange.name}] ...`);
                 await channel.close();
             }
         }
