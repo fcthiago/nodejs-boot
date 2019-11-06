@@ -2,13 +2,13 @@ const amqp = require("amqplib");
 
 module.exports = class RabbitMQAmqpProvider {
 
-    constructor({application, logger}) {
+    constructor({ application, logger }) {
         this.application = application;
         this.logger = logger;
     }
 
-    static checkConfiguration(application){
-        if(application.amqp != null && application.amqp.rabbitmq != null) {
+    static checkConfiguration(application) {
+        if (application.amqp != null && application.amqp.rabbitmq != null) {
             if (!application.amqp.rabbitmq.connection_string) {
                 console.error("[RabbitMQ Setup] - Amqp Connection String not set.");
                 return false;
@@ -27,13 +27,13 @@ module.exports = class RabbitMQAmqpProvider {
      * @returns {Promise<unknown>}
      */
     async publishToExchange({ routingKey, exchangeName, data, headers }) {
-        const {application} = this;
+        const { application } = this;
         // connect to Rabbit MQ and create a channel
         let connection = await amqp.connect(application.amqp.rabbitmq.connection_string);
         let channel = await connection.createConfirmChannel();
 
         return new Promise((resolve, reject) => {
-            channel.publish(exchangeName, routingKey, Buffer.from(JSON.stringify(data), 'utf-8'), { persistent: true, headers: headers }, function (err, ok) {
+            channel.publish(exchangeName, routingKey, Buffer.from(JSON.stringify(data), 'utf-8'), { persistent: true, headers: headers }, function(err, ok) {
                 if (err) {
                     return reject(err);
                 }
@@ -52,7 +52,7 @@ module.exports = class RabbitMQAmqpProvider {
      * @param paramArray
      * @returns {Promise<void>}
      */
-    async consumeExchangeByQueue(paramArray){
+    async consumeExchangeByQueue(paramArray) {
         const { application } = this;
 
         // connect to Rabbit MQ
@@ -62,7 +62,7 @@ module.exports = class RabbitMQAmqpProvider {
         let channel = await connection.createChannel();
         await channel.prefetch(1);
 
-        await this.consume({connection, channel}, paramArray);
+        await this.consume({ connection, channel }, paramArray);
     }
 
     /**
@@ -72,12 +72,12 @@ module.exports = class RabbitMQAmqpProvider {
      * @param paramArray
      * @returns {Promise<unknown>}
      */
-    async consume({ connection, channel}, paramArray){
+    async consume({ connection, channel }, paramArray) {
         return new Promise((resolve, reject) => {
 
-            paramArray.forEach((data)=>{
+            paramArray.forEach((data) => {
 
-                channel.consume(data[1], async (payload) => {
+                channel.consume(data[1], async(payload) => {
                     await data[2](payload, channel);
                 });
 
@@ -98,15 +98,15 @@ module.exports = class RabbitMQAmqpProvider {
     /**
      * Setup the queues and exchanges based on the application file
      */
-    async setupQueues(){
-        const {application} = this;
+    async setupQueues() {
+        const { application } = this;
         const binds = application.amqp.rabbitmq.bindings;
 
         const connection = await amqp.connect(application.amqp.rabbitmq.connection_string)
-            .catch((err)=>{
+            .catch((err) => {
                 this.logger.error(`[RabbitMQ Setup] - Cannot connect to [${application.amqp.rabbitmq.connection_string}]`);
             });
-        if(connection == null) return;
+        if (connection == null) return;
 
         let channel;
         if (application.amqp.verbose) this.logger.debug("[RabbitMQ Setup] - Starting...");
@@ -116,13 +116,13 @@ module.exports = class RabbitMQAmqpProvider {
             await channel.assertExchange(bind.exchange.name, bind.exchange.type, bind.exchange.options);
             if (application.amqp.verbose) this.logger.debug(`[RabbitMQ Setup] - [${bind.exchange.name}][${bind.exchange.type}] - Creating Exchange...`);
 
-            for(const queue of bind.queues){
+            for (const queue of bind.queues) {
                 //Create Queue
                 await channel.assertQueue(queue.name, queue.options);
                 if (application.amqp.verbose) this.logger.debug(`[RabbitMQ Setup] - [${queue.name}] - Creating Queue...`);
                 await channel.bindQueue(queue.name, bind.exchange.name, queue.routingKey);
                 if (application.amqp.verbose && queue.routingKey) this.logger.debug(`[RabbitMQ Setup] - [${queue.name}] - Binding with exchange - [${bind.exchange.name}] with RoutingKey [${queue.routingKey}]...`);
-                else if(application.amqp.verbose) this.logger.debug(`[RabbitMQ Setup] - [${queue.name}] - Binding with exchange - [${bind.exchange.name}] ...`);
+                else if (application.amqp.verbose) this.logger.debug(`[RabbitMQ Setup] - [${queue.name}] - Binding with exchange - [${bind.exchange.name}] ...`);
                 await channel.close();
             }
         }
