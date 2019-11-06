@@ -10,6 +10,7 @@ module.exports = class MongodbConfigurator {
             console.error("No Mongo configuration found !");
             return false
         }
-        return false
+        console.log("Mongo configuration found, connecting ...")
+        return true
     }
 }
