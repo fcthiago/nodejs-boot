@@ -8,6 +8,6 @@ module.exports = class MongodbProvider {
     }
 
     static connectDb(application) {
-        return mongoose.connect(application.mongo.url);
+        return mongoose.connect(application.mongo.url, { useNewUrlParser: true });
     }
 }
