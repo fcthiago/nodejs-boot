@@ -1,6 +1,6 @@
 module.exports = class MongodbConfigurator {
 
-    constructor(application, logger) {
+    constructor({ application, logger }) {
         this.application = application;
         this.logger = logger;
     }
