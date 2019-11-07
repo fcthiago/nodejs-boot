@@ -7,10 +7,10 @@ module.exports = class MongodbConfigurator {
 
     static checkConfiguration(application) {
         if (application.mongo == null) {
-            console.error("No Mongo configuration found !");
+            this.logger.info("No Mongo configuration found !");
             return false
         }
-        console.log("Mongo configuration found, connecting ...")
+        this.logger.info("Mongo configuration found, connecting ...");
         return true
     }
 }
